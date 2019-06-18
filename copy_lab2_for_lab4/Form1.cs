@@ -1,5 +1,14 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.Text;
 
 namespace Lab2_CS
 {
@@ -36,6 +45,54 @@ namespace Lab2_CS
               richTextBox1.Text = triangle.ToString();
               dataGridView1.Rows.Add("Triangle", triangle.Line, prisma.Height, triangle.Area, triangle.Perimeter,0,0);
             }
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            if (saveFileDialog1.ShowDialog() == DialogResult.Cancel)
+                return;
+            string path = saveFileDialog1.FileName;
+            BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.OpenOrCreate));
+            int counter = 0;
+            for (int i = 0; i < dataGridView1.RowCount; i++)
+            {
+                for (int j = 0; j < dataGridView1.ColumnCount; j++)
+                {
+                    writer.Write(dataGridView1.Rows[i].Cells[j].Value.ToString());
+                }
+                counter++;
+            }
+            writer.Close();
+            richTextBox1.Text = "Exporting succesfull";
+        }
+
+        private void importToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            dataGridView1.Rows.Add();
+            if (openFileDialog1.ShowDialog() == DialogResult.Cancel)
+                return;
+            string path = openFileDialog1.FileName;
+            BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open));
+            for (int i = 0; i < dataGridView1.RowCount; i++)
+            {
+                if (reader.PeekChar() != -1)
+                {
+                    for (int j = 0; j < dataGridView1.ColumnCount; j++)
+                    {
+                        dataGridView1.Rows[i].Cells[j].Value = reader.ReadString();
+                    }
+                    dataGridView1.Rows.Add();
+                }
+                else
+                {
+                    reader.Close();
+                    break;
+                }
+            }
+            dataGridView1.Rows.RemoveAt(dataGridView1.RowCount - 1);
+            richTextBox1.Text = "File imported succesfully";
         }
 
         private void button2_Click(object sender, EventArgs e)
